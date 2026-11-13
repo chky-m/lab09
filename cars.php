@@ -1,23 +1,42 @@
-<?php
-    require_once("settings.php");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Car catalogue</title>
+</head>
+<body>
+    <h1>Cars</h1>
+    <p><a href="search_form.php">Search cars</a></p>
+    <?php
+    require_once "settings.php";
+    mysqli_report(MYSQLI_REPORT_OFF);
     $dbconn = mysqli_connect($host, $user, $pwd, $sql_db);
-    if ($dbconn){
-        $query = "SELECT * FROM cars";
-        $result = mysqli_query($dbconn, $query);
-        if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                echo "<td>Car ID: " . $row["car_id"] . "</td>";
-                echo "<td>make: " . $row["make"] . "</td>";
-                echo "<td>model: " . $row["model"] . "</td>";
-                echo "<td>price: " . $row["price"] . "</td>";
-                echo "<td>YOM: " . $row["YOM"] . "</td>";
-                echo "<hr>";
-            }
-        } else {
-            echo "<p>Error executing query: " . mysqli_error($dbconn) . "</p>";
+    if (!$dbconn) {
+        die("<p>Unable to connect to database.</p>");
+    }
+    mysqli_set_charset($dbconn, "utf8mb4");
+    $result = mysqli_query($dbconn, "SELECT * FROM cars ORDER BY car_id");
+
+    if (!$result) {
+        echo "<p>Unable to load cars.</p>";
+    } elseif (mysqli_num_rows($result) === 0) {
+        echo "<p>No cars found.</p>";
+    } else {
+        echo "<table>";
+        echo "<tr><th>ID</th><th>Make</th><th>Model</th><th>Price</th><th>Year</th></tr>";
+        while ($row = mysqli_fetch_assoc($result)) {
+            echo "<tr>";
+            echo "<td>" . (int) $row['car_id'] . "</td>";
+            echo "<td>" . htmlspecialchars($row['make']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['model']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['price']) . "</td>";
+            echo "<td>" . (int) $row['yom'] . "</td>";
+            echo "</tr>";
         }
-        mysqli_close($dbconn);
-        } else {
-            echo "<p>Unable to connect to database</p>";
-        }
-    
+        echo "</table>";
+    }
+    mysqli_close($dbconn);
+    ?>
+</body>
+</html>
